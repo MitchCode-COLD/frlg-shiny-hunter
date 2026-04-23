@@ -296,3 +296,61 @@ button.danger { background: transparent; border-color: var(--border); color: var
 .log-history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .log-history-title { margin: 0; }
 .log-count { font-size: 13px; color: var(--muted); }
+
+/* STATS BAR */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.stats-cell {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+}
+.stats-label { font-size: 11px; color: var(--hint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.stats-value { font-size: 18px; font-weight: 700; color: var(--text); }
+.stats-best { color: var(--green); }
+.trend-up { color: var(--green); font-size: 14px; }
+.trend-down { color: var(--red); font-size: 14px; }
+.trend-flat { color: var(--muted); font-size: 14px; }
+.stats-actions { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.stats-add-btn { padding: 8px 16px; font-size: 14px; }
+.stats-reset-btn { padding: 8px 10px; font-size: 13px; }
+
+/* SETUP */
+.setup-tip { margin-bottom: 12px; }
+.setup-link { color: var(--blue); }
+.setup-seed-val { color: var(--blue); font-family: monospace; font-weight: 700; }
+.setup-target-badge { margin-left: 6px; }
+.setup-ivs { font-size: 12px; }
+.mono-input { font-family: monospace; }
+.pid-result { margin-top: 8px; font-size: 14px; }
+.text-gold { color: var(--gold); }
+
+/* PRACTICE */
+.practice-card { text-align: center; }
+.practice-btn {
+  width: 100%;
+  padding: 40px 20px;
+  font-size: 24px;
+  font-weight: 700;
+  transition: all 0.05s;
+}
+.practice-btn-ready {
+  background: var(--gold);
+  color: #000;
+  border-color: var(--gold);
+}
+.practice-result { margin-top: 16px; font-size: 16px; }
+.practice-avg { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.practice-hit-num { color: var(--hint); }
+.practice-hit-ms { color: var(--muted); font-size: 12px; }
+.badge-ok { background: var(--surface2); color: var(--text); }

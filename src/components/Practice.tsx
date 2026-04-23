@@ -13,7 +13,7 @@ interface Hit {
   early: boolean
 }
 
-const FRAME_MS = 1000 / 119.4  // ~8.38ms per frame on Switch
+const FRAME_MS = 1000 / 119.4
 
 export default function Practice(_props: Props) {
   const { beep } = useAudio()
@@ -22,13 +22,29 @@ export default function Practice(_props: Props) {
   const [countdown, setCountdown] = useState(0)
   const cueTimeRef = useRef<number>(0)
   const rafRef = useRef<number>(0)
+  const countdownRefs = useRef<ReturnType<typeof setTimeout>[]>([])
   const hitIdRef = useRef(0)
+
+  function clearCountdowns() {
+    countdownRefs.current.forEach(clearTimeout)
+    countdownRefs.current = []
+  }
 
   const startRound = useCallback(() => {
     setPhase('waiting')
-    const delay = 3000 + Math.random() * 3000  // 3-6s
+    const delay = 4000 + Math.random() * 4000  // 4-8s, gives room for 3-2-1
     const cueAt = performance.now() + delay
     cueTimeRef.current = cueAt
+
+    // 5-4-3-2-1 at exact 1-second intervals — beat 6 is the tap cue
+    clearCountdowns()
+    const countBeats = [5000, 4000, 3000, 2000, 1000]
+    countBeats.forEach((ms, i) => {
+      if (delay > ms + 200) {
+        const freq = 350 + i * 60
+        countdownRefs.current.push(setTimeout(() => beep(freq, 0.08), delay - ms))
+      }
+    })
 
     const tick = () => {
       const now = performance.now()
@@ -50,19 +66,17 @@ export default function Practice(_props: Props) {
       return
     }
     if (phase === 'waiting') {
-      // Tapped too early — penalise
       cancelAnimationFrame(rafRef.current)
-      const errorMs = performance.now() - cueTimeRef.current  // negative = early
-      const absMs = Math.abs(errorMs)
-      const errorFrames = absMs / FRAME_MS
+      clearCountdowns()
+      const errorMs = performance.now() - cueTimeRef.current
+      const errorFrames = Math.abs(errorMs) / FRAME_MS
       setHits(prev => [...prev, { id: hitIdRef.current++, errorMs, errorFrames, early: errorMs < 0 }])
       setPhase('result')
       return
     }
     if (phase === 'ready') {
       const errorMs = performance.now() - cueTimeRef.current
-      const absMs = Math.abs(errorMs)
-      const errorFrames = absMs / FRAME_MS
+      const errorFrames = Math.abs(errorMs) / FRAME_MS
       beep(errorFrames <= 1 ? 1046 : errorFrames <= 5 ? 660 : 440, 0.1)
       setHits(prev => [...prev, { id: hitIdRef.current++, errorMs, errorFrames, early: errorMs < 0 }])
       setPhase('result')
@@ -79,34 +93,30 @@ export default function Practice(_props: Props) {
     return 'practice-error-bad'
   }
 
+  const isReady = phase === 'ready'
+
   return (
     <>
       <div className="callout callout-blue">
-        <strong>Timing practice:</strong> Tap the big button when you hear the beep (or see it flash). Your reaction time is measured in frames at Switch speed (1 frame ≈ 8.4ms). Try to stay within 1–2 frames.
+        <strong>Timing practice:</strong> Wait for the 3-2-1 beeps, then tap when you hear the final high beep (or the button flashes). Measured in frames at Switch speed (1 frame ≈ 8.4ms). Aim for within 1–2 frames.
       </div>
 
-      <div className="card" style={{ textAlign: 'center' }}>
+      <div className="card practice-card">
         <button
-          className="primary"
+          type="button"
+          className={`practice-btn${isReady ? ' practice-btn-ready' : ''}`}
           onClick={handleTap}
-          style={{
-            width: '100%',
-            padding: '40px 20px',
-            fontSize: 24,
-            fontWeight: 700,
-            background: phase === 'ready' ? 'var(--gold)' : undefined,
-            color: phase === 'ready' ? '#000' : undefined,
-            borderColor: phase === 'ready' ? 'var(--gold)' : undefined,
-            transition: 'all 0.05s',
-          }}
         >
-          {phase === 'idle' ? 'Tap to start' : phase === 'waiting' ? `Wait… (${(countdown / 1000).toFixed(1)}s)` : phase === 'ready' ? '★ TAP NOW! ★' : 'Tap to try again'}
+          {phase === 'idle' ? 'Tap to start'
+            : phase === 'waiting' ? `Wait… ${(countdown / 1000).toFixed(1)}s`
+            : phase === 'ready' ? '★ TAP NOW! ★'
+            : 'Tap to try again'}
         </button>
 
         {phase === 'result' && hits.length > 0 && (() => {
           const last = hits[hits.length - 1]
           return (
-            <div style={{ marginTop: 16, fontSize: 16 }}>
+            <div className="practice-result">
               {last.early ? 'Too early' : 'Too late'} by{' '}
               <span className={hitClass(last)}>
                 {last.errorFrames.toFixed(1)} frames ({last.errorMs > 0 ? '+' : ''}{last.errorMs.toFixed(0)}ms)
@@ -116,32 +126,32 @@ export default function Practice(_props: Props) {
         })()}
 
         {avgError !== null && (
-          <div style={{ marginTop: 8, fontSize: 14, color: 'var(--muted)' }}>
-            Average error: {avgError.toFixed(1)} frames over {hits.length} hit{hits.length !== 1 ? 's' : ''}
+          <div className="practice-avg">
+            Average: {avgError.toFixed(1)} frames over {hits.length} hit{hits.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
 
       {hits.length > 0 && (
         <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div className="card-title" style={{ margin: 0 }}>Hit history</div>
-            <button className="danger" onClick={() => setHits([])}>Clear</button>
+          <div className="log-history-header">
+            <div className="card-title log-history-title">Hit history</div>
+            <button type="button" className="danger" onClick={() => setHits([])}>Clear</button>
           </div>
           {[...hits].reverse().map((h, i) => (
             <div className="practice-hit" key={h.id}>
-              <span style={{ color: 'var(--hint)' }}>#{hits.length - i}</span>
+              <span className="practice-hit-num">#{hits.length - i}</span>
               <span className={hitClass(h)}>
                 {h.early ? '←' : '→'} {h.errorFrames.toFixed(1)} frames
               </span>
-              <span style={{ color: 'var(--muted)', fontSize: 12 }}>
+              <span className="practice-hit-ms">
                 {h.early ? '-' : '+'}{Math.abs(h.errorMs).toFixed(0)}ms {h.early ? '(early)' : '(late)'}
               </span>
-              <span style={{ fontSize: 12 }}>
+              <span>
                 {h.errorFrames <= 1
                   ? <span className="badge badge-shiny">★ Perfect</span>
                   : h.errorFrames <= 3
-                  ? <span className="badge" style={{ background: 'var(--surface2)', color: 'var(--text)' }}>Good</span>
+                  ? <span className="badge badge-ok">Good</span>
                   : <span className="badge badge-no">Off</span>}
               </span>
             </div>

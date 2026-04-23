@@ -6,6 +6,7 @@ import Timer from './components/Timer'
 import FixOffset from './components/FixOffset'
 import Practice from './components/Practice'
 import Log from './components/Log'
+import StatsBar from './components/StatsBar'
 import type { LogEntry } from './types'
 
 type Tab = 'setup' | 'seed' | 'timer' | 'fix' | 'practice' | 'log'
@@ -20,6 +21,7 @@ export default function App() {
   const [calibOffset, setCalibOffset] = useState(0)
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [lastFrameMatch, setLastFrameMatch] = useState<number | null>(null)
+  const [attempts, setAttempts] = useState(0)
 
   const myTSV = tsv(tid, sid)
 
@@ -33,6 +35,13 @@ export default function App() {
         <p>FireRed &amp; LeafGreen · Nintendo Switch &amp; Switch 2 · No hacks required</p>
       </div>
 
+      <StatsBar
+        attempts={attempts}
+        onAdd={() => setAttempts(a => a + 1)}
+        onReset={() => setAttempts(0)}
+        logs={logs}
+      />
+
       <div className="tabs">
         {([
           ['setup', '1. Setup'],
@@ -43,6 +52,7 @@ export default function App() {
           ['log', '6. Log'],
         ] as [Tab, string][]).map(([id, label]) => (
           <button
+            type="button"
             key={id}
             className={`tab${tab === id ? ' active' : ''}`}
             onClick={() => setTab(id)}

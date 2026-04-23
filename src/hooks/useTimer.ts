@@ -5,9 +5,9 @@ export type TimerPhase = 'idle' | 'stage1' | 'stage2' | 'stage3' | 'done'
 
 export interface TimerState {
   phase: TimerPhase
-  remaining: number  // ms
-  total: number      // ms for current stage
-  stagesComplete: number[]  // 1-indexed
+  remaining: number
+  total: number
+  stagesComplete: number[]
 }
 
 export function useTimer(delays: [number, number, number], calibOffset: number) {
@@ -22,14 +22,32 @@ export function useTimer(delays: [number, number, number], calibOffset: number) 
   const startRef = useRef<number>(0)
   const stageRef = useRef<number>(0)
   const completedRef = useRef<number[]>([])
+  const countdownRefs = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  function clearCountdowns() {
+    countdownRefs.current.forEach(clearTimeout)
+    countdownRefs.current = []
+  }
 
   const runStage = useCallback(
     (stage: number) => {
+      clearCountdowns()
       stageRef.current = stage
       const dur = stage === 3 ? delays[2] + calibOffset : delays[stage - 1]
       startRef.current = performance.now()
 
-      beep(660, 0.08)
+      // Stage-start beep — this is the "action" cue for this stage
+      beep(660, 0.1)
+
+      // 5-4-3-2-1 countdown at exact 1-second intervals — equal spacing = steady rhythm
+      // Beat 6 is the action cue (next stage start beep or NOW! fanfare)
+      const countBeats = [5000, 4000, 3000, 2000, 1000]
+      countBeats.forEach((ms, i) => {
+        if (dur > ms + 200) {
+          const freq = 350 + i * 60  // 350→590 Hz, rising pitch builds tension
+          countdownRefs.current.push(setTimeout(() => beep(freq, 0.08), dur - ms))
+        }
+      })
 
       const tick = () => {
         const elapsed = performance.now() - startRef.current
@@ -45,22 +63,13 @@ export function useTimer(delays: [number, number, number], calibOffset: number) 
         if (remaining <= 0) {
           completedRef.current = [...completedRef.current, stage]
           if (stage < 3) {
-            beep(440, 0.1)  // beep to signal stage completion
-            setTimeout(() => runStage(stage + 1), 100)
+            setTimeout(() => runStage(stage + 1), 50)
           } else {
-            // 6-beep countdown: 5, 4, 3, 2, 1, GO
-            beep(880, 0.12)     // 5
-            setTimeout(() => beep(880, 0.12), 130)   // 4
-            setTimeout(() => beep(880, 0.12), 260)   // 3
-            setTimeout(() => beep(880, 0.12), 390)   // 2
-            setTimeout(() => beep(880, 0.12), 520)   // 1
-            setTimeout(() => beep(1568, 0.3), 650)   // GO (higher pitch)
-            setState({
-              phase: 'done',
-              remaining: 0,
-              total: dur,
-              stagesComplete: [1, 2, 3],
-            })
+            // 6th beep = NOW! — two quick high beeps then the big GO
+            beep(1047, 0.15)
+            setTimeout(() => beep(1047, 0.15), 120)
+            setTimeout(() => beep(1568, 0.4), 240)
+            setState({ phase: 'done', remaining: 0, total: dur, stagesComplete: [1, 2, 3] })
           }
           return
         }
@@ -81,6 +90,7 @@ export function useTimer(delays: [number, number, number], calibOffset: number) 
 
   const reset = useCallback(() => {
     cancelAnimationFrame(rafRef.current)
+    clearCountdowns()
     completedRef.current = []
     setState({ phase: 'idle', remaining: 0, total: 0, stagesComplete: [] })
   }, [])

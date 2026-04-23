@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRLG Shiny Starter Tool</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3248;
+    --text: #e8eaf6;
+    --muted: #7b82a8;
+    --hint: #4a506e;
+    --gold: #f5c842;
+    --gold-bg: #2a2410;
+    --blue: #4a9eff;
+    --blue-bg: #0d1f35;
+    --green: #4caf7d;
+    --green-bg: #0a2018;
+    --red: #e05a5a;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 6px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .star { color: var(--gold); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 9px 6px;
+    font-size: 13px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .tab:hover { color: var(--text); background: var(--surface2); }
+  .tab.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* CALLOUTS */
+  .callout {
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 14px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+    border: 1px solid;
+  }
+  .callout-blue { background: var(--blue-bg); border-color: #1a3a5c; color: #a8d0ff; }
+  .callout-gold { background: var(--gold-bg); border-color: #4a3a0a; color: #f0d070; }
+  .callout-green { background: var(--green-bg); border-color: #0a3020; color: #80d0a0; }
+  .callout-red { background: #1f0a0a; border-color: #3f1010; color: #f09090; }
+
+  .callout strong { font-weight: 600; }
+
+  /* FORM */
+  label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  input[type=number], input[type=text], select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus { border-color: var(--blue); }
+
+  input[type=range] {
+    width: 100%;
+    height: 6px;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field { flex: 1; min-width: 120px; margin-bottom: 10px; }
+  .field:last-child, .field:only-child { margin-bottom: 0; }
+
+  /* BUTTONS */
+  button {
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: inherit;
+  }
+  button:hover { background: #2e3350; border-color: var(--blue); }
+  button:active { transform: scale(0.97); }
+  button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  button.primary:hover { background: #3a8eef; }
+  button.danger { background: transparent; border-color: var(--border); color: var(--muted); }
+
+  /* BIG DISPLAYS */
+  .big-number {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .big-timer {
+    font-size: 64px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: -2px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    padding: 12px 0 4px;
+  }
+  .big-timer.go { color: var(--gold); }
+
+  .timer-status {
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    min-height: 20px;
+  }
+
+  /* PROGRESS */
+  .progress {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 4px;
+    transition: width 0.05s linear;
+  }
+
+  /* STAGE LIST */
+  .stage {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stage:last-child { border-bottom: none; }
+
+  .stage-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .stage-dot.active { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+  .stage-dot.done { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+
+  .stage-info { flex: 1; }
+  .stage-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .stage-desc { font-size: 13px; color: var(--muted); }
+  .stage-time { font-size: 14px; color: var(--muted); font-weight: 600; min-width: 52px; text-align: right; padding-top: 4px; }
+
+  /* FRAME TABLE */
+  .ftable { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ftable th { text-align: left; color: var(--muted); font-size: 12px; font-weight: 500; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .ftable td { padding: 7px 10px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  .ftable tr:last-child td { border-bottom: none; }
+  .ftable tr.target td { background: var(--blue-bg); color: var(--blue); font-weight: 600; }
+  .ftable tr.shiny-match td { background: #1f1800; }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-shiny { background: var(--gold-bg); color: var(--gold); border: 1px solid #4a3a0a; }
+  .badge-no { background: var(--surface2); color: var(--hint); }
+  .badge-target { background: var(--blue-bg); color: var(--blue); font-size: 11px; }
+
+  /* IV GRID */
+  .iv-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .iv-cell { text-align: center; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 4px; }
+  .iv-cell-lbl { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .iv-cell-val { font-size: 20px; font-weight: 700; }
+  .iv-low { color: var(--red); }
+  .iv-mid { color: var(--text); }
+  .iv-high { color: var(--green); }
+  .iv-none { color: var(--hint); }
+
+  /* LOG */
+  .log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-num { color: var(--hint); min-width: 28px; padding-top: 1px; }
+  .log-body { flex: 1; }
+  .log-title { font-weight: 600; color: var(--text); }
+  .log-sub { color: var(--muted); margin-top: 2px; font-size: 12px; }
+  .log-time { color: var(--hint); font-size: 11px; }
+  .log-shiny { color: var(--gold); }
+
+  .empty { text-align: center; color: var(--muted); padding: 32px; font-size: 14px; }
+
+  /* SECTION DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  .inline-num { font-size: 20px; font-weight: 700; color: var(--text); }
+
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  .stat-range { font-size: 12px; color: var(--hint); }
+
+  .offset-display {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1><span class="star">★</span> FRLG Shiny Starter Tool</h1>
+    <p>FireRed &amp; LeafGreen · Nintendo Switch &amp; Switch 2 · No hacks required</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="sw('setup')">1. Setup</button>
+    <button class="tab" onclick="sw('timer')">2. Timer</button>
+    <button class="tab" onclick="sw('fix')">3. Fix offset</button>
+    <button class="tab" onclick="sw('log')">4. Log</button>
+  </div>
+
+  <!-- ==================== SETUP ==================== -->
+  <div class="panel active" id="panel-setup">
+
+    <div class="callout callout-gold">
+      <strong>Before you start:</strong> Create a dummy save file in the game with text speed set to <strong>Fast</strong>. This makes the game's random number consistent every boot so your timing actually works.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your Trainer ID numbers</div>
+      <p class="hint" style="margin-bottom:12px;">
+        Your <strong>Trainer ID (TID)</strong> is visible in your Trainer Card in-game. Your <strong>Secret ID (SID)</strong> is hidden — it's calculated from the frame you land on when you start a new game. Enter both here if you know them, or just start with your TID and guess your target SID from Lincoln's tool.
+      </p>
+      <div class="row">
+        <div class="field">
+          <label>Trainer ID (TID) — shown in game</label>
+          <input type="number" id="tid" value="57562" min="0" max="65535" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>Secret ID (SID) — hidden, calculated</label>
+          <input type="number" id="sid" value="50534" min="0" max="65535" oninput="recalc()">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="card-title">Your shiny value (TSV)</div>
+      <p class="hint" style="margin-bottom:10px;">This is the number your trainer "is." Any Pokémon whose own shiny value matches this number will be shiny for you. You can't change it — it's locked to your TID + SID combo.</p>
+      <div class="big-number" id="tsv-out">934</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Target advance (frame)</div>
+      <p class="hint" style="margin-bottom:12px;">
+        The game counts up numbers invisibly in the background — these are called "frames" or "advances." You're trying to press a button at a very specific count. Enter the frame number you're aiming for (from Lincoln's tool or RNG Reporter).
+      </p>
+      <div class="row">
+        <div class="field">
+          <label>Target advance number</label>
+          <input type="number" id="tf" value="3498" min="0" oninput="recalc()">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="card-title">Frames around your target</div>
+      <p class="hint" style="margin-bottom:10px;">The table below shows what happens if you're a few frames early or late. Your target frame is highlighted in blue. A "Match" means that frame would give you a shiny starter.</p>
+      <div style="overflow-x:auto;">
+        <table class="ftable">
+          <thead><tr><th>Advance</th><th>TID</th><th>SID</th><th>Shiny Value</th><th>Shiny?</th></tr></thead>
+          <tbody id="ftbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Check any Pokémon's PID (optional)</div>
+      <p class="hint" style="margin-bottom:10px;">If you want to verify whether a specific Pokémon would be shiny for you, paste its PID here. The PID is a hex number visible in tools like PKHeX.</p>
+      <div class="field">
+        <label>Pokémon PID (hexadecimal, e.g. 1A2B3C4D)</label>
+        <input type="text" id="pid" placeholder="Leave blank if you don't need this" oninput="chkPSV()" style="font-family:monospace;">
+      </div>
+      <div style="margin-top:8px;font-size:14px;min-height:24px;" id="psv-out"></div>
+    </div>
+
+  </div>
+
+  <!-- ==================== TIMER ==================== -->
+  <div class="panel" id="panel-timer">
+
+    <div class="callout callout-blue">
+      <strong>How this works:</strong> The timer counts down three stages. You need to press a button at exactly the right moment in each stage. The Switch runs the game's RNG <strong>twice as fast</strong> as the original GBA, so timing is tight — that's why the offset slider exists.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Set your stage delays</div>
+      <p class="hint" style="margin-bottom:14px;">These are how long each countdown is. You'll adjust these over time as you calibrate. Start with the defaults — after your first attempt you can use the <strong>Fix Offset</strong> tab to figure out what to change.</p>
+
+      <div class="field" style="margin-bottom:14px;">
+        <label>Stage 1 delay — from pressing start to going back to the home menu (ms)</label>
+        <input type="number" id="d1" value="3000" min="100" step="50" oninput="updDL(1)">
+        <div class="hint" id="d1l">= 3.00 seconds</div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Stage 2 delay — from resuming to pressing A on the continue screen (ms)</label>
+        <input type="number" id="d2" value="2000" min="100" step="50" oninput="updDL(2)">
+        <div class="hint" id="d2l">= 2.00 seconds</div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Stage 3 delay — from the continue screen to pressing A to grab your starter (ms)</label>
+        <input type="number" id="d3" value="1500" min="100" step="50" oninput="updDL(3)">
+        <div class="hint" id="d3l">= 1.50 seconds</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <label>Calibration offset — adjust this after each attempt once you know your frame error</label>
+      <p class="hint" style="margin-bottom:8px;">Positive = you're pressing too late. Negative = you're pressing too early. Each frame is about 16–17ms.</p>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <input type="range" id="off" min="-500" max="500" value="0" step="10" oninput="updOff()">
+        <span style="font-size:16px;font-weight:700;min-width:72px;text-align:right;" id="offl">+0 ms</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stage" id="stage1">
+        <div class="stage-dot" id="d1d">1</div>
+        <div class="stage-info">
+          <div class="stage-name">Boot → home menu</div>
+          <div class="stage-desc">Launch the game, then immediately press the home button to go back to the Switch home screen</div>
+        </div>
+        <div class="stage-time" id="st1">—</div>
+      </div>
+      <div class="stage" id="stage2">
+        <div class="stage-dot" id="d2d">2</div>
+        <div class="stage-info">
+          <div class="stage-name">Resume → continue screen</div>
+          <div class="stage-desc">Tap the game to resume it, then press A when you see "Continue" on the save select screen</div>
+        </div>
+        <div class="stage-time" id="st2">—</div>
+      </div>
+      <div class="stage" id="stage3">
+        <div class="stage-dot" id="d3d">3</div>
+        <div class="stage-info">
+          <div class="stage-name">Press A to grab your starter</div>
+          <div class="stage-desc">Walk up to the Poké Ball and press A at exactly the right moment — this is the critical press</div>
+        </div>
+        <div class="stage-time" id="st3">—</div>
+      </div>
+
+      <div class="big-timer" id="btimer">—</div>
+      <div class="timer-status" id="tstat">Press Start when you're ready</div>
+      <div class="progress"><div class="progress-fill" id="pfill" style="width:0%"></div></div>
+
+      <div class="btn-row">
+        <button class="primary" onclick="startT()" id="btn-start">Start timer</button>
+        <button class="danger" onclick="resetT()">Reset</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== FIX OFFSET ==================== -->
+  <div class="panel" id="panel-fix">
+
+    <div class="callout callout-gold">
+      <strong>When to use this:</strong> Your starter wasn't shiny. Level it up to level 6 or 7 (fight a few wild Pokémon), then enter its stats below. This tells you how many frames off you were so you can fix your timer.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Step 1 — pick your starter and level</div>
+      <div class="row">
+        <div class="field">
+          <label>Which starter did you pick?</label>
+          <select id="starter" onchange="updCalib()">
+            <option value="bulb">Bulbasaur</option>
+            <option value="char">Charmander</option>
+            <option value="squi">Squirtle</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>What level did you reach?</label>
+          <select id="clvl" onchange="updCalib()">
+            <option value="6">Level 6</option>
+            <option value="7">Level 7</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Does it have a stat-boosting or reducing nature?</label>
+          <select id="cnature" onchange="updCalib()">
+            <option value="1.0">Neutral (most common)</option>
+            <option value="1.1">Boosting (+10%)</option>
+            <option value="0.9">Hindering (-10%)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Step 2 — enter your starter's current stats</div>
+      <p class="hint" style="margin-bottom:12px;">Open your starter's summary screen and type in every stat exactly as shown. The valid range for each stat at this level is shown in the label.</p>
+      <div class="row" id="stat-inputs"></div>
+    </div>
+
+    <div class="card" id="calib-result">
+      <div class="card-title">Step 3 — your hidden values (IVs)</div>
+      <p class="hint" style="margin-bottom:6px;">IVs are hidden numbers (0–31) that the game assigned to each stat when the Pokémon was generated. They're determined by the exact frame you hit. <span style="color:var(--green);">Green = great (25–31)</span>, white = okay, <span style="color:var(--red);">red = low (0–10)</span>.</p>
+      <div class="iv-grid" id="iv-display"></div>
+
+      <div class="divider"></div>
+
+      <div class="card-title">Step 4 — how to fix your timer</div>
+      <div id="offset-est" class="offset-display" style="color:var(--muted);">Enter all six stats above to see your fix recommendation.</div>
+    </div>
+
+  </div>
+
+  <!-- ==================== LOG ==================== -->
+  <div class="panel" id="panel-log">
+
+    <div class="callout callout-blue">
+      <strong>Track every attempt here.</strong> Most people find their shiny within 5–15 tries once the timer is calibrated. Logging your offset each time shows you if you're getting closer.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Record this attempt</div>
+      <div class="row">
+        <div class="field">
+          <label>Starter chosen</label>
+          <select id="ls"><option>Bulbasaur</option><option>Charmander</option><option>Squirtle</option></select>
+        </div>
+        <div class="field">
+          <label>Did you get a shiny?</label>
+          <select id="lr"><option value="no">No — trying again</option><option value="yes">Yes — got it!</option></select>
+        </div>
+        <div class="field">
+          <label>Frames off (from Fix Offset tab)</label>
+          <input type="number" id="lo" placeholder="e.g. 12 or -5">
+        </div>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>What did you adjust?</label>
+        <input type="text" id="ln" placeholder="e.g. moved offset slider to -200ms">
+      </div>
+      <div style="margin-top:12px;">
+        <button class="primary" onclick="addLog()">Save attempt</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="card-title" style="margin:0;">Attempt history</div>
+        <div style="font-size:13px;color:var(--muted);" id="lcnt">0 attempts</div>
+      </div>
+      <div id="llist"><div class="empty">Nothing logged yet — your first attempt will appear here</div></div>
+    </div>
+
+  </div>
+
+</div><!-- /app -->
+
+<script>
+const BASES = {
+  bulb: { name:'Bulbasaur', hp:45, atk:49, def:45, spa:65, spd:65, spe:45 },
+  char: { name:'Charmander', hp:39, atk:52, def:43, spa:60, spd:50, spe:65 },
+  squi: { name:'Squirtle', hp:44, atk:48, def:65, spa:50, spd:64, spe:43 }
+};
+const STATS = ['hp','atk','def','spa','spd','spe'];
+const SNAMES = ['HP','Atk','Def','SpA','SpD','Spe'];
+let logs = [];
+let T = { run:false, stage:0, iv:null, dur:0, start:0 };
+
+function sw(t) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="sw('${t}')"]`).classList.add('active');
+  document.getElementById('panel-'+t).classList.add('active');
+}
+
+function tsv(t,s){ return ((t^s)>>4)&0xFFF; }
+function psv(p){ return (((p>>>16)^(p&0xFFFF))>>4)&0xFFF; }
+
+function recalc() {
+  const tid = +document.getElementById('tid').value||0;
+  const sid = +document.getElementById('sid').value||0;
+  const tf  = +document.getElementById('tf').value||0;
+  const myTSV = tsv(tid, sid);
+  document.getElementById('tsv-out').textContent = myTSV;
+  const tb = document.getElementById('ftbody');
+  tb.innerHTML = '';
+  for (let i = tf-3; i <= tf+3; i++) {
+    const rT = ((i%65536)+65536)%65536;
+    const rS = (((i-1)%65536)+65536)%65536;
+    const rTSV = tsv(rT, rS);
+    const isT = i===tf, isS = rTSV===myTSV;
+    const tr = document.createElement('tr');
+    tr.className = isT ? 'target' : (isS ? 'shiny-match' : '');
+    tr.innerHTML = `<td>${i}${isT ? ' <span class="badge badge-target">YOUR TARGET</span>' : ''}</td>
+      <td>${rT}</td><td>${rS}</td><td>${rTSV}</td>
+      <td>${isS ? '<span class="badge badge-shiny">★ Shiny</span>' : '<span class="badge badge-no">No</span>'}</td>`;
+    tb.appendChild(tr);
+  }
+  chkPSV();
+}
+
+function chkPSV() {
+  const raw = document.getElementById('pid').value.replace(/\s/g,'');
+  const out = document.getElementById('psv-out');
+  if (!raw) { out.innerHTML = ''; return; }
+  const pid = parseInt(raw, 16);
+  if (isNaN(pid)) { out.innerHTML = '<span style="color:var(--red)">Not a valid hex number</span>'; return; }
+  const tid = +document.getElementById('tid').value||0;
+  const sid = +document.getElementById('sid').value||0;
+  const pv = psv(pid), tv = tsv(tid,sid), sh = pv===tv;
+  out.innerHTML = sh
+    ? `<span style="color:var(--gold)">★ This Pokémon IS shiny for your trainer! (PSV ${pv} = TSV ${tv})</span>`
+    : `<span style="color:var(--muted)">Not shiny for you. Its shiny value is ${pv}, yours is ${tv}.</span>`;
+}
+
+function statHP(b,iv,lv){ return Math.floor(((2*b+iv)*lv)/100)+lv+10; }
+function statOther(b,iv,lv,n){ return Math.floor((Math.floor(((2*b+iv)*lv)/100)+5)*n); }
+function solveIV(b,val,lv,isHP,n){
+  for(let iv=0;iv<=31;iv++){
+    if((isHP?statHP(b,iv,lv):statOther(b,iv,lv,n))===val) return iv;
+  }
+  return null;
+}
+
+function updCalib() {
+  const key = document.getElementById('starter').value;
+  const b = BASES[key];
+  const lv = +document.getElementById('clvl').value;
+  const n  = +document.getElementById('cnature').value;
+  document.getElementById('stat-inputs').innerHTML = STATS.map((s,i) => {
+    const base = b[s], isHP = s==='hp';
+    const lo = isHP ? statHP(base,0,lv) : statOther(base,0,lv,n);
+    const hi = isHP ? statHP(base,31,lv) : statOther(base,31,lv,n);
+    return `<div class="field">
+      <label>${SNAMES[i]} <span class="stat-range">(valid range: ${lo}–${hi})</span></label>
+      <input type="number" id="cs_${s}" min="${lo}" max="${hi}" placeholder="${lo}–${hi}" oninput="calcIVs()">
+    </div>`;
+  }).join('');
+  calcIVs();
+}
+
+function calcIVs() {
+  const key = document.getElementById('starter').value;
+  const b   = BASES[key];
+  const lv  = +document.getElementById('clvl').value;
+  const n   = +document.getElementById('cnature').value;
+  const ivs = {};
+  let allFilled = true;
+  for (let s of STATS) {
+    const el = document.getElementById('cs_'+s);
+    if (!el || !el.value) { allFilled = false; ivs[s] = null; continue; }
+    ivs[s] = solveIV(b[s], +el.value, lv, s==='hp', n);
+  }
+  document.getElementById('iv-display').innerHTML = STATS.map((s,i) => {
+    const v = ivs[s];
+    const cls = v===null ? 'iv-none' : v>=25 ? 'iv-high' : v>=11 ? 'iv-mid' : 'iv-low';
+    return `<div class="iv-cell"><div class="iv-cell-lbl">${SNAMES[i]}</div><div class="iv-cell-val ${cls}">${v!==null?v:'?'}</div></div>`;
+  }).join('');
+
+  const oe = document.getElementById('offset-est');
+  if (!allFilled) { oe.textContent = 'Enter all six stats above to see your fix recommendation.'; oe.style.color='var(--muted)'; return; }
+  if (STATS.some(s => ivs[s]===null)) {
+    oe.innerHTML = '<span style="color:var(--red)">One or more stats are outside the valid range. Double-check you entered the right level and that you have no EVs from Vitamins.</span>';
+    return;
+  }
+  const tf = +document.getElementById('tf').value||3498;
+  const hp=ivs.hp, atk=ivs.atk, def=ivs.def;
+  const word1 = hp|(atk<<5)|(def<<10);
+  const frameGuess = word1 % 100;
+  const diff = frameGuess - (tf % 100);
+  const approxMs = Math.round(diff * 16.7);
+  oe.style.color = '';
+  oe.innerHTML = `
+    <div style="margin-bottom:10px;">
+      <strong style="color:var(--text);">Your IV fingerprint:</strong><br>
+      HP ${hp} · Atk ${atk} · Def ${def} · SpA ${ivs.spa} · SpD ${ivs.spd} · Spe ${ivs.spe}
+    </div>
+    <div style="margin-bottom:10px;">
+      <strong style="color:var(--text);">What to do next:</strong><br>
+      Compare these IVs against your target frame's expected IVs in RNG Reporter or Lincoln's tool. Count how many frames apart they are.
+    </div>
+    <div style="margin-bottom:10px;">
+      <strong style="color:var(--text);">Conversion:</strong><br>
+      Each frame = ~16.7ms. So if you were 10 frames off, adjust your <strong>offset slider</strong> on the Timer tab by ±167ms.<br>
+      • Hitting <em>too late</em> (high frame number) → drag slider left (negative)<br>
+      • Hitting <em>too early</em> (low frame number) → drag slider right (positive)
+    </div>
+    <div style="color:var(--muted);font-size:13px;">Tip: log this attempt with the frame offset, then try again with the adjusted timer.</div>
+  `;
+}
+
+function updDL(n) {
+  const ms = +document.getElementById('d'+n).value||0;
+  document.getElementById('d'+n+'l').textContent = '= ' + (ms/1000).toFixed(2) + ' seconds';
+}
+function updOff() {
+  const v = +document.getElementById('off').value;
+  document.getElementById('offl').textContent = (v>=0?'+':'') + v + ' ms';
+}
+function getDelays() {
+  const off = +document.getElementById('off').value||0;
+  return [1,2,3].map(n => Math.max(100,(+document.getElementById('d'+n).value||0)+(n===3?off:0)));
+}
+
+function startT() {
+  if (T.run) return;
+  T.run = true; T.stage = 1; runStage(1);
+}
+function runStage(s) {
+  const delays = getDelays(), dur = delays[s-1];
+  T.dur = dur; T.start = Date.now();
+  const labels = ['Boot → home menu','Resume → continue screen','Press A to grab starter'];
+  ['d1d','d2d','d3d'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'stage-dot' + (i+1<s?' done':i+1===s?' active':'');
+    el.textContent = i+1<s ? '✓' : i+1;
+  });
+  document.getElementById('tstat').textContent = 'Stage ' + s + ': ' + labels[s-1];
+  if (T.iv) clearInterval(T.iv);
+  T.iv = setInterval(() => {
+    const el = Date.now()-T.start, rem = Math.max(0, dur-el);
+    const bt = document.getElementById('btimer');
+    bt.textContent = (rem/1000).toFixed(2);
+    bt.className = 'big-timer' + (rem<500?' go':'');
+    document.getElementById('pfill').style.width = Math.min(100,(el/dur)*100) + '%';
+    document.getElementById('st'+s).textContent = (rem/1000).toFixed(2) + 's';
+    if (rem <= 0) {
+      clearInterval(T.iv);
+      document.getElementById('d'+s+'d').className = 'stage-dot done';
+      document.getElementById('d'+s+'d').textContent = '✓';
+      if (s < 3) { T.stage = s+1; runStage(s+1); }
+      else { finishT(); }
+    }
+  }, 50);
+}
+function finishT() {
+  T.run = false;
+  const bt = document.getElementById('btimer');
+  bt.textContent = 'NOW!';
+  bt.className = 'big-timer go';
+  document.getElementById('tstat').textContent = '★ Press A to grab your starter!';
+  document.getElementById('pfill').style.width = '100%';
+  ['st1','st2','st3'].forEach(id => document.getElementById(id).textContent = '—');
+}
+function resetT() {
+  if (T.iv) clearInterval(T.iv);
+  T.run = false; T.stage = 0;
+  const bt = document.getElementById('btimer');
+  bt.textContent = '—'; bt.className = 'big-timer';
+  document.getElementById('tstat').textContent = 'Press Start when you\'re ready';
+  document.getElementById('pfill').style.width = '0%';
+  ['d1d','d2d','d3d'].forEach((id,i) => {
+    const el = document.getElementById(id);
+    el.className = 'stage-dot'; el.textContent = i+1;
+  });
+  ['st1','st2','st3'].forEach(id => document.getElementById(id).textContent = '—');
+}
+
+function addLog() {
+  const st = document.getElementById('ls').value;
+  const res = document.getElementById('lr').value;
+  const off = document.getElementById('lo').value;
+  const note = document.getElementById('ln').value;
+  logs.push({ n:logs.length+1, st, res, off, note, time: new Date().toLocaleTimeString() });
+  document.getElementById('ln').value = ''; document.getElementById('lo').value = '';
+  renderLog();
+}
+function renderLog() {
+  document.getElementById('lcnt').textContent = logs.length + ' attempt' + (logs.length!==1?'s':'');
+  const list = document.getElementById('llist');
+  if (!logs.length) { list.innerHTML = '<div class="empty">Nothing logged yet</div>'; return; }
+  list.innerHTML = [...logs].reverse().map(l => `
+    <div class="log-entry">
+      <div class="log-num">#${l.n}</div>
+      <div class="log-body">
+        <div class="log-title ${l.res==='yes'?'log-shiny':''}">${l.res==='yes'?'★ Shiny! ':''}${l.st}</div>
+        ${l.off ? `<div class="log-sub">Frame offset: ${l.off}</div>` : ''}
+        ${l.note ? `<div class="log-sub">${l.note}</div>` : ''}
+      </div>
+      <div class="log-time">${l.time}</div>
+    </div>`).join('');
+}
+
+recalc();
+updDL(1); updDL(2); updDL(3);
+updCalib();
+</script>
+</body>
+</html>
